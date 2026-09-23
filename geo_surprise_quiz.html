@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geography Surprise Quiz — Unit 1</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+  :root {
+    --bg: #0c1224; --panel: #141b32; --panel2: #1b2545;
+    --teal: #00c2d4; --gold: #e0a92b; --red: #e5534b; --green: #3ecf7e;
+    --text: #eef1fb; --muted: #93a0c4; --border: #2a3560;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Manrope', sans-serif; min-height: 100vh; }
+  body { display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+  .card { width: 100%; max-width: 640px; background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+  h1 { font-family: 'Archivo Black', sans-serif; font-size: 1.5rem; margin: 0 0 4px; letter-spacing: 0.5px; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+  .hidden { display: none !important; }
+
+  /* Gate screen */
+  #gate label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--gold); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+  #gate input[type=text] { width: 100%; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--panel2); color: var(--text); font-size: 1.05rem; font-family: 'Manrope', sans-serif; margin-bottom: 20px; }
+  #gate input[type=text]:focus { outline: 2px solid var(--teal); }
+  .btn { border: none; border-radius: 10px; padding: 14px 22px; font-weight: 800; font-size: 1rem; cursor: pointer; font-family: 'Manrope', sans-serif; transition: transform 0.1s ease; }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--gold); color: #1b1200; width: 100%; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+
+  .topics-note { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 0.85rem; color: var(--muted); margin-bottom: 14px; }
+  .honor-box { background: rgba(229,83,75,0.1); border: 1px solid rgba(229,83,75,0.4); border-radius: 10px; padding: 12px 14px; font-size: 0.85rem; color: #ffb4af; margin-bottom: 20px; }
+  .honor-box b { color: #ff9891; }
+
+  /* Quiz screen */
+  #quiz .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .pill { background: var(--panel2); border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--teal); }
+  .pill.score { color: var(--gold); }
+  .progress-track { height: 6px; background: var(--panel2); border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--gold)); transition: width 0.3s ease; }
+  .topic-tag { display: inline-block; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 4px 10px; border-radius: 6px; margin-right: 6px; margin-bottom: 12px; }
+  .topic-tag.tectonics { background: rgba(0,194,212,0.15); color: var(--teal); }
+  .topic-tag.hazards { background: rgba(224,169,43,0.15); color: var(--gold); }
+  .topic-tag.response { background: rgba(62,207,127,0.15); color: var(--green); }
+  .type-tag { display: inline-block; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 4px 10px; border-radius: 6px; margin-bottom: 12px; background: var(--panel2); color: var(--muted); border: 1px solid var(--border); }
+  .question { font-size: 1.15rem; font-weight: 700; margin-bottom: 18px; line-height: 1.4; }
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .option { text-align: left; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--panel2); color: var(--text); font-size: 0.98rem; cursor: pointer; font-family: 'Manrope', sans-serif; }
+  .option:hover { border-color: var(--teal); }
+  .option.correct { border-color: var(--green); background: rgba(62,207,127,0.15); }
+  .option.incorrect { border-color: var(--red); background: rgba(229,83,75,0.15); }
+  .option:disabled { cursor: default; }
+  .feedback { font-size: 0.9rem; padding: 12px 14px; border-radius: 10px; margin-bottom: 16px; }
+  .feedback.correct { background: rgba(62,207,127,0.12); color: var(--green); border: 1px solid rgba(62,207,127,0.4); }
+  .feedback.incorrect { background: rgba(229,83,75,0.12); color: #ff9891; border: 1px solid rgba(229,83,75,0.4); }
+  .feedback.partial { background: rgba(224,169,43,0.12); color: var(--gold); border: 1px solid rgba(224,169,43,0.4); }
+  .nav-row { display: flex; justify-content: flex-end; }
+  .fill-input { width: 100%; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--panel2); color: var(--text); font-size: 1.05rem; font-family: 'Manrope', sans-serif; margin-bottom: 16px; }
+  .fill-input:focus { outline: 2px solid var(--teal); }
+  .long-area { width: 100%; min-height: 150px; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--panel2); color: var(--text); font-size: 1rem; font-family: 'Manrope', sans-serif; margin-bottom: 12px; resize: vertical; line-height: 1.5; }
+  .long-area:focus { outline: 2px solid var(--teal); }
+  .char-count { font-size: 0.78rem; color: var(--muted); margin-bottom: 16px; }
+  .model-answer-box { background: var(--panel2); border: 1px solid var(--teal); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+  .model-answer-box .label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--teal); margin-bottom: 6px; }
+  .model-answer-box .body { font-size: 0.92rem; line-height: 1.5; }
+  .keyword-note { font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
+  .keyword-note b { color: var(--text); }
+
+  /* Final screen */
+  #final { text-align: center; }
+  .score-ring { width: 150px; height: 150px; border-radius: 50%; margin: 10px auto 18px; display: flex; align-items: center; justify-content: center; flex-direction: column; border: 6px solid var(--gold); background: var(--panel2); }
+  .score-ring .big { font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 700; color: var(--gold); }
+  .score-ring .small { font-size: 0.75rem; color: var(--muted); }
+  .final-name { font-size: 1.2rem; font-weight: 800; margin-bottom: 2px; }
+  .final-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 22px; }
+  .breakdown { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; text-align: left; }
+  .breakdown-row { display: flex; justify-content: space-between; align-items: center; background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 0.9rem; }
+  .breakdown-row .label { font-weight: 700; }
+  .breakdown-row .frac { font-family: 'JetBrains Mono', monospace; color: var(--teal); }
+  .level-tag { display: inline-block; padding: 6px 16px; border-radius: 999px; font-weight: 800; font-size: 0.85rem; margin-bottom: 18px; }
+  .level-tag.strong { background: rgba(62,207,127,0.15); color: var(--green); }
+  .level-tag.solid { background: rgba(0,194,212,0.15); color: var(--teal); }
+  .level-tag.developing { background: rgba(224,169,43,0.15); color: var(--gold); }
+  .level-tag.needs { background: rgba(229,83,75,0.15); color: #ff9891; }
+  .action-row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .action-row .btn { flex: 1; }
+  .btn-pdf { background: var(--teal); color: #04202a; }
+
+  .review-list { text-align: left; margin-top: 8px; }
+  .review-item { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+  .review-item .rq { font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; }
+  .review-item .ra { font-size: 0.85rem; margin-bottom: 4px; }
+  .review-item .ra.you { color: var(--muted); }
+  .review-item .ra.right { color: var(--green); }
+  .review-item .ra.wrong { color: #ff9891; }
+  .review-item .ra.partial { color: var(--gold); }
+  .review-item .ra.model { color: var(--teal); }
+  .review-toggle { margin-top: 6px; margin-bottom: 12px; }
+
+  /* Print-only area */
+  #printArea { display: none; }
+  @media print {
+    body * { visibility: hidden; }
+    #printArea, #printArea * { visibility: visible; }
+    #printArea { display: block; position: absolute; left: 0; top: 0; width: 100%; background: #fff; color: #111; padding: 20px; font-family: Arial, sans-serif; }
+    #printArea h2 { font-size: 20px; margin-bottom: 2px; }
+    #printArea .p-sub { color: #555; font-size: 12px; margin-bottom: 14px; }
+    #printArea .p-score { font-size: 16px; font-weight: bold; margin-bottom: 10px; border: 2px solid #333; padding: 8px 12px; display: inline-block; }
+    #printArea .p-breakdown { margin-bottom: 16px; }
+    #printArea .p-breakdown div { font-size: 12px; margin-bottom: 3px; }
+    #printArea .p-q { border: 1px solid #ccc; padding: 8px 10px; margin-bottom: 8px; page-break-inside: avoid; }
+    #printArea .p-q .pqh { font-weight: bold; font-size: 12px; margin-bottom: 4px; }
+    #printArea .p-q .pqa { font-size: 12px; margin-bottom: 2px; }
+    #printArea .p-right { color: #1a7d3a; }
+    #printArea .p-wrong { color: #b3261e; }
+    #printArea .p-partial { color: #8a6100; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <div id="gate">
+    <h1>📍 Surprise Quiz — Unit 1 Check-In</h1>
+    <div class="subtitle">CGC1W · Natural Events &amp; Disasters</div>
+    <div class="topics-note">Multiple choice, fill-in-the-blank, and paragraph-length long-answer questions covering everything so far: Earth's Structure &amp; Plate Tectonics (Monday), Geological Hazards (Tuesday), and Ways to Respond to Natural Disasters (today).</div>
+    <div class="honor-box"><b>Before you start:</b> This is a personal check-in on what YOU remember from class — please answer from memory, without using AI, notes, or searching online. It helps your teacher see how you're really doing.</div>
+    <label for="nameInput">Enter your name to start</label>
+    <input type="text" id="nameInput" placeholder="e.g. Ali Hassan" autocomplete="off">
+    <button class="btn btn-primary" id="startBtn" disabled>Start Quiz</button>
+  </div>
+
+  <div id="quiz" class="hidden">
+    <div class="topbar">
+      <span class="pill" id="progressPill">Question 1 / 18</span>
+      <span class="pill score" id="scorePill">Score: 0</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div id="tagsWrap"></div>
+    <div class="question" id="questionText"></div>
+    <div id="answerArea"></div>
+    <div id="feedbackWrap"></div>
+    <div class="nav-row"><button class="btn btn-primary hidden" id="nextBtn">Next Question →</button></div>
+  </div>
+
+  <div id="final" class="hidden">
+    <div class="score-ring">
+      <div class="big" id="finalScoreText">0/21</div>
+      <div class="small">AUTO-SCORED</div>
+    </div>
+    <div class="final-name" id="finalName"></div>
+    <div class="final-sub">completed the Unit 1 surprise quiz</div>
+    <div id="levelTag"></div>
+    <div class="breakdown" id="breakdownWrap"></div>
+    <div class="action-row">
+      <button class="btn btn-pdf" id="pdfBtn">⬇ Download as PDF</button>
+    </div>
+    <button class="btn btn-outline review-toggle" id="reviewBtn" style="width:100%;">Review All Answers</button>
+    <div class="review-list hidden" id="reviewList"></div>
+    <button class="btn btn-outline" id="retryBtn" style="width:100%;">Try Again</button>
+  </div>
+
+</div>
+
+<div id="printArea"></div>
+
+<script>
+(function() {
+  function norm(s) { return (s || '').toLowerCase().trim().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' '); }
+  function escapeHtml(s) { return (s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  const QUESTIONS = [
+    // --- MCQ: Monday - Plate Tectonics ---
+    { type: 'mcq', topic: 'tectonics', topicLabel: 'Plate Tectonics', q: "What are Earth's three main internal layers, from outside to inside?", opts: ['Crust, mantle, core', 'Core, mantle, crust', 'Mantle, crust, core', 'Crust, core, mantle'], correct: 0, points: 1,
+      explain: "Correct order from the outside in is crust → mantle → core." },
+    { type: 'mcq', topic: 'tectonics', topicLabel: 'Plate Tectonics', q: 'At a convergent plate boundary, the plates are...', opts: ['Moving apart', 'Sliding past each other', 'Moving toward each other / colliding', 'Not moving at all'], correct: 2, points: 1,
+      explain: 'Convergent = plates move toward each other and collide.' },
+    { type: 'mcq', topic: 'tectonics', topicLabel: 'Plate Tectonics', q: 'At a transform plate boundary, the plates are...', opts: ['Sliding past each other horizontally', 'Colliding head-on', 'Moving apart, creating new crust', 'Melting into the mantle'], correct: 0, points: 1,
+      explain: 'Transform boundaries involve plates sliding past one another — this is what causes many earthquakes along faults.' },
+    { type: 'mcq', topic: 'tectonics', topicLabel: 'Plate Tectonics', q: 'Most earthquakes and volcanoes occur...', opts: ['Randomly, anywhere on Earth', 'Only in Canada', 'Along tectonic plate boundaries', 'Only in the ocean'], correct: 2, points: 1,
+      explain: 'Plate boundaries are where the geological stress builds up, so that\'s where most hazards cluster.' },
+
+    // --- MCQ: Tuesday - Geological Hazards ---
+    { type: 'mcq', topic: 'hazards', topicLabel: 'Geological Hazards', q: 'A tsunami is most commonly triggered by...', opts: ['A landslide on dry land', 'An underwater earthquake', 'A volcanic eruption on land', 'Strong winds'], correct: 1, points: 1,
+      explain: "An underwater earthquake can displace a huge volume of water, creating a tsunami." },
+    { type: 'mcq', topic: 'hazards', topicLabel: 'Geological Hazards', q: 'A landslide is most likely to happen after...', opts: ['A long period of extreme cold', 'Heavy rain saturates a hillside', 'A clear, dry summer day', 'A full moon'], correct: 1, points: 1,
+      explain: 'Saturated soil becomes heavy and unstable, making a slope more likely to give way.' },
+    { type: 'mcq', topic: 'hazards', topicLabel: 'Geological Hazards', q: 'The magnitude scale for earthquakes measures...', opts: ['How many people are affected', 'The size/energy released by the earthquake', 'How long the earthquake lasts', 'The temperature underground'], correct: 1, points: 1,
+      explain: 'Magnitude measures the energy released at the source — not casualties or duration directly.' },
+    { type: 'mcq', topic: 'hazards', topicLabel: 'Geological Hazards', q: 'Volcanoes are especially common along the...', opts: ['Prime Meridian', '"Ring of Fire" around the Pacific Ocean', 'Equator only', 'Arctic Circle only'], correct: 1, points: 1,
+      explain: 'The Ring of Fire follows major plate boundaries circling the Pacific Ocean.' },
+
+    // --- MCQ: Today - Disaster Response ---
+    { type: 'mcq', topic: 'response', topicLabel: 'Disaster Response', q: 'The correct response during an earthquake is to...', opts: ['Run outside immediately', 'Drop, Cover, and Hold On', 'Stand in a doorway and wait', 'Call 911 before doing anything else'], correct: 1, points: 1,
+      explain: 'Drop, Cover, and Hold On protects you from falling debris, which causes most earthquake injuries.' },
+    { type: 'mcq', topic: 'response', topicLabel: 'Disaster Response', q: 'Which of these is a "BEFORE" action, not a "during" or "after" action?', opts: ['Evacuating to higher ground', 'Building an emergency kit in advance', 'Checking for injuries once it\'s over', 'Waiting for the official all-clear'], correct: 1, points: 1,
+      explain: 'Preparing an emergency kit happens BEFORE a hazard strikes — it\'s a preparedness action.' },
+    { type: 'mcq', topic: 'response', topicLabel: 'Disaster Response', q: 'What are the four stages of the Disaster Management Cycle, in order?', opts: ['Response, Recovery, Mitigation, Preparedness', 'Mitigation, Preparedness, Response, Recovery', 'Preparedness, Response, Mitigation, Recovery', 'Recovery, Mitigation, Response, Preparedness'], correct: 1, points: 1,
+      explain: 'The cycle runs: Mitigation (reduce risk) → Preparedness (plan ahead) → Response (act during) → Recovery (rebuild after).' },
+    { type: 'mcq', topic: 'response', topicLabel: 'Disaster Response', q: 'During a flood, the safest action is to...', opts: ['Drive or walk through the flood water to get home faster', 'Move to higher ground and avoid the water entirely', 'Wait inside a basement until it passes', 'Ignore official evacuation orders if you feel fine'], correct: 1, points: 1,
+      explain: 'Flood water can be deeper, faster-moving, and more contaminated than it looks — moving to higher ground is the safe response.' },
+
+    // --- Fill in the Blank (1 per topic) ---
+    { type: 'fill', topic: 'tectonics', topicLabel: 'Plate Tectonics', q: 'The three main layers of Earth, from outside to inside, are the crust, the ______, and the core.', accepted: ['mantle'], points: 1,
+      explain: 'The mantle sits between the crust and the core.' },
+    { type: 'fill', topic: 'hazards', topicLabel: 'Geological Hazards', q: 'A tsunami is most commonly triggered by an underwater ______.', accepted: ['earthquake'], points: 1,
+      explain: 'An underwater earthquake displaces huge volumes of water, generating a tsunami.' },
+    { type: 'fill', topic: 'response', topicLabel: 'Disaster Response', q: 'The correct earthquake response is: Drop, ______, and Hold On.', accepted: ['cover'], points: 1,
+      explain: 'Drop, Cover, and Hold On protects you from falling debris.' },
+
+    // --- Long Answer / Paragraph (1 per topic, auto-scored by keyword coverage, max 2 points each) ---
+    { type: 'long', topic: 'tectonics', topicLabel: 'Plate Tectonics', maxPoints: 2,
+      q: 'In a full paragraph, explain why earthquakes and volcanoes are most common along plate boundaries. Use what you learned about plate movement in your answer.',
+      keywords: ['boundary', 'boundaries', 'plates', 'plate', 'pressure', 'stress', 'magma', 'interact', 'collide', 'colliding'],
+      model: 'Plate boundaries are where tectonic plates interact — colliding, pulling apart, or sliding past each other. That interaction builds up pressure/stress in the rock, which is released suddenly as an earthquake. At some boundaries, that same movement lets magma from the mantle push up through weak points in the crust, causing volcanic eruptions. Away from boundaries, plates aren\'t interacting with each other, so there is far less geological activity.' },
+    { type: 'long', topic: 'hazards', topicLabel: 'Geological Hazards', maxPoints: 2,
+      q: "In a full paragraph, explain the difference between an earthquake's magnitude and its real-world impact on a community. Give a reason why they aren't always the same.",
+      keywords: ['magnitude', 'energy', 'impact', 'population', 'building', 'buildings', 'distance', 'epicenter', 'density', 'damage'],
+      model: 'Magnitude measures the actual energy released at an earthquake\'s source — it is a fixed scientific number that doesn\'t change based on where the earthquake happens. Real-world impact, on the other hand, also depends on other factors: how close a community is to the epicenter, how densely populated the area is, and how well the buildings are constructed. Because of this, a high-magnitude earthquake in a remote, unpopulated area can actually cause less real-world damage than a moderate-magnitude earthquake that strikes a crowded city with poorly built structures.' },
+    { type: 'long', topic: 'response', topicLabel: 'Disaster Response', maxPoints: 2,
+      q: 'In a full paragraph, describe one preparedness action a family could take before a natural hazard, and explain why it would actually help during and after the hazard.',
+      keywords: ['emergency', 'kit', 'plan', 'evacuation', 'prepare', 'before', 'supplies', 'help', 'family', 'route'],
+      model: 'One example is building an emergency kit before a hazard strikes — including water, non-perishable food, a flashlight, and a first-aid kit. This helps because it means a family has what they need to survive for the first few days without depending on outside help arriving immediately, which is especially important right after a disaster when roads may be blocked and emergency services may be delayed or overwhelmed. Knowing evacuation routes in advance is another example, since it removes the need to figure that out under pressure during the actual emergency.' },
+  ];
+
+  const TOPIC_META = {
+    tectonics: { label: 'Plate Tectonics', class: 'tectonics' },
+    hazards: { label: 'Geological Hazards', class: 'hazards' },
+    response: { label: 'Disaster Response', class: 'response' },
+  };
+  const TYPE_LABEL = { mcq: 'Multiple Choice', fill: 'Fill in the Blank', long: 'Long Answer' };
+  const MAX_SCORE = QUESTIONS.reduce((sum, q) => sum + (q.maxPoints || q.points || 1), 0);
+
+  const STORAGE_KEY = 'geoSurpriseQuizStateV3';
+  let state = { name: '', current: 0, score: 0, answered: false, perTopic: {}, responses: [] };
+
+  function saveState() {
+    try {
+      if (window.claude && window.claude.hot) { window.claude.hot.snapshot(state); return; }
+    } catch (e) {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+  function loadState() {
+    try {
+      if (window.claude && window.claude.hot && window.claude.hot.snapshotData) return window.claude.hot.snapshotData;
+    } catch (e) {}
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return null;
+  }
+
+  const gateEl = document.getElementById('gate');
+  const quizEl = document.getElementById('quiz');
+  const finalEl = document.getElementById('final');
+  const nameInput = document.getElementById('nameInput');
+  const startBtn = document.getElementById('startBtn');
+
+  nameInput.addEventListener('input', () => { startBtn.disabled = nameInput.value.trim().length === 0; });
+  nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !startBtn.disabled) startQuiz(); });
+  startBtn.addEventListener('click', startQuiz);
+
+  function startQuiz() {
+    state.name = nameInput.value.trim();
+    state.current = 0;
+    state.score = 0;
+    state.answered = false;
+    state.perTopic = {
+      tectonics: { correct: 0, total: 0 },
+      hazards: { correct: 0, total: 0 },
+      response: { correct: 0, total: 0 },
+    };
+    state.responses = [];
+    QUESTIONS.forEach(q => { state.perTopic[q.topic].total += (q.maxPoints || q.points || 1); });
+    saveState();
+    gateEl.classList.add('hidden');
+    quizEl.classList.remove('hidden');
+    renderQuestion();
+  }
+
+  const progressPill = document.getElementById('progressPill');
+  const scorePill = document.getElementById('scorePill');
+  const progressFill = document.getElementById('progressFill');
+  const tagsWrap = document.getElementById('tagsWrap');
+  const questionText = document.getElementById('questionText');
+  const answerArea = document.getElementById('answerArea');
+  const feedbackWrap = document.getElementById('feedbackWrap');
+  const nextBtn = document.getElementById('nextBtn');
+
+  function renderQuestion() {
+    const q = QUESTIONS[state.current];
+    state.answered = false;
+    progressPill.textContent = `Question ${state.current + 1} / ${QUESTIONS.length}`;
+    scorePill.textContent = `Score: ${state.score}/${MAX_SCORE}`;
+    progressFill.style.width = `${(state.current / QUESTIONS.length) * 100}%`;
+    tagsWrap.innerHTML = `<span class="topic-tag ${TOPIC_META[q.topic].class}">${TOPIC_META[q.topic].label}</span><span class="type-tag">${TYPE_LABEL[q.type]}</span>`;
+    questionText.textContent = q.q;
+    answerArea.innerHTML = '';
+    feedbackWrap.innerHTML = '';
+    nextBtn.classList.add('hidden');
+
+    if (q.type === 'mcq') {
+      q.opts.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option';
+        btn.textContent = opt;
+        btn.addEventListener('click', () => selectMcq(i));
+        answerArea.appendChild(btn);
+      });
+    } else if (q.type === 'fill') {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'fill-input';
+      input.placeholder = 'Type the missing word...';
+      input.id = 'fillInput';
+      answerArea.appendChild(input);
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-primary';
+      btn.textContent = 'Check Answer';
+      btn.style.width = '100%';
+      btn.style.marginBottom = '16px';
+      btn.addEventListener('click', () => submitFill());
+      answerArea.appendChild(btn);
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitFill(); });
+      setTimeout(() => input.focus(), 50);
+    } else if (q.type === 'long') {
+      const area = document.createElement('textarea');
+      area.className = 'long-area';
+      area.placeholder = 'Write a full paragraph (4+ sentences) in your own words...';
+      area.id = 'longArea';
+      answerArea.appendChild(area);
+      const count = document.createElement('div');
+      count.className = 'char-count';
+      count.textContent = 'Write at least 80 characters (roughly a few sentences) to submit.';
+      count.id = 'charCount';
+      answerArea.appendChild(count);
+      area.addEventListener('input', () => {
+        const len = area.value.trim().length;
+        count.textContent = len >= 80 ? `${len} characters — ready to submit.` : `Write at least 80 characters (roughly a few sentences) to submit. (${len}/80)`;
+        submitLongBtn.disabled = len < 80;
+      });
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-primary';
+      btn.textContent = 'Submit Paragraph';
+      btn.style.width = '100%';
+      btn.style.marginBottom = '16px';
+      btn.disabled = true;
+      btn.addEventListener('click', () => submitLong());
+      answerArea.appendChild(btn);
+      var submitLongBtn = btn;
+    }
+  }
+
+  function recordResponse(obj) {
+    state.responses.push(Object.assign({ q: QUESTIONS[state.current].q, topic: QUESTIONS[state.current].topic, type: QUESTIONS[state.current].type }, obj));
+  }
+
+  function selectMcq(i) {
+    if (state.answered) return;
+    state.answered = true;
+    const q = QUESTIONS[state.current];
+    const buttons = answerArea.querySelectorAll('.option');
+    buttons.forEach((b, idx) => {
+      b.disabled = true;
+      if (idx === q.correct) b.classList.add('correct');
+      else if (idx === i) b.classList.add('incorrect');
+    });
+    const isCorrect = i === q.correct;
+    const pts = isCorrect ? q.points : 0;
+    state.score += pts;
+    state.perTopic[q.topic].correct += pts;
+    scorePill.textContent = `Score: ${state.score}/${MAX_SCORE}`;
+    const fb = document.createElement('div');
+    fb.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+    fb.textContent = (isCorrect ? '✓ Correct — ' : '✗ Not quite — ') + q.explain;
+    feedbackWrap.appendChild(fb);
+    recordResponse({ your: q.opts[i], correctAnswer: q.opts[q.correct], points: pts, maxPoints: q.points, status: isCorrect ? 'right' : 'wrong' });
+    finishAnswer();
+  }
+
+  function submitFill() {
+    if (state.answered) return;
+    state.answered = true;
+    const q = QUESTIONS[state.current];
+    const input = document.getElementById('fillInput');
+    input.disabled = true;
+    const val = input.value;
+    const isCorrect = q.accepted.some(a => norm(a) === norm(val));
+    const pts = isCorrect ? q.points : 0;
+    state.score += pts;
+    state.perTopic[q.topic].correct += pts;
+    scorePill.textContent = `Score: ${state.score}/${MAX_SCORE}`;
+    input.style.borderColor = isCorrect ? 'var(--green)' : 'var(--red)';
+    const fb = document.createElement('div');
+    fb.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+    fb.textContent = (isCorrect ? '✓ Correct — ' : `✗ The correct answer was "${q.accepted[0]}" — `) + q.explain;
+    feedbackWrap.appendChild(fb);
+    recordResponse({ your: val || '(blank)', correctAnswer: q.accepted[0], points: pts, maxPoints: q.points, status: isCorrect ? 'right' : 'wrong' });
+    finishAnswer();
+  }
+
+  function submitLong() {
+    if (state.answered) return;
+    state.answered = true;
+    const q = QUESTIONS[state.current];
+    const area = document.getElementById('longArea');
+    area.disabled = true;
+    const val = area.value.trim();
+    const normed = norm(val);
+    const hits = q.keywords.filter(kw => normed.includes(norm(kw)));
+    const uniqueHitStems = [...new Set(hits.map(h => h.replace(/s$/, '')))];
+    let pts = 0;
+    if (uniqueHitStems.length >= 3) pts = q.maxPoints;
+    else if (uniqueHitStems.length >= 1) pts = 1;
+    state.score += pts;
+    state.perTopic[q.topic].correct += pts;
+    scorePill.textContent = `Score: ${state.score}/${MAX_SCORE}`;
+
+    const box = document.createElement('div');
+    box.className = 'model-answer-box';
+    box.innerHTML = `<div class="label">Model Answer — Compare With Your Own</div><div class="body">${escapeHtml(q.model)}</div>`;
+    feedbackWrap.appendChild(box);
+
+    const fb = document.createElement('div');
+    fb.className = 'feedback ' + (pts === q.maxPoints ? 'correct' : (pts > 0 ? 'partial' : 'incorrect'));
+    fb.innerHTML = `Auto-score: <b>${pts}/${q.maxPoints}</b> points, based on key ideas detected in your answer.`;
+    feedbackWrap.appendChild(fb);
+
+    const note = document.createElement('div');
+    note.className = 'keyword-note';
+    note.innerHTML = uniqueHitStems.length
+      ? `Key ideas we found in your answer: <b>${uniqueHitStems.join(', ')}</b>. This is a keyword-based auto-score, not full AI grading — your teacher may adjust it after reading your paragraph.`
+      : `We didn't detect key vocabulary from class in your answer. This is a keyword-based auto-score, not full AI grading — your teacher may adjust it after reading your paragraph.`;
+    feedbackWrap.appendChild(note);
+
+    recordResponse({ your: val, correctAnswer: q.model, points: pts, maxPoints: q.maxPoints, status: pts === q.maxPoints ? 'right' : (pts > 0 ? 'partial' : 'wrong'), keywordsFound: uniqueHitStems });
+    finishAnswer();
+  }
+
+  function finishAnswer() {
+    nextBtn.classList.remove('hidden');
+    nextBtn.textContent = state.current === QUESTIONS.length - 1 ? 'See My Results →' : 'Next Question →';
+    saveState();
+  }
+
+  nextBtn.addEventListener('click', () => {
+    if (state.current < QUESTIONS.length - 1) {
+      state.current++;
+      renderQuestion();
+    } else {
+      showFinal();
+    }
+  });
+
+  function levelFor(pct) {
+    if (pct >= 85) return { text: 'Strong Understanding', cls: 'strong' };
+    if (pct >= 70) return { text: 'Solid Understanding', cls: 'solid' };
+    if (pct >= 50) return { text: 'Developing — Needs Review', cls: 'developing' };
+    return { text: 'Needs Support', cls: 'needs' };
+  }
+
+  function showFinal() {
+    quizEl.classList.add('hidden');
+    finalEl.classList.remove('hidden');
+    document.getElementById('finalScoreText').textContent = `${state.score}/${MAX_SCORE}`;
+    document.getElementById('finalName').textContent = state.name;
+    const pct = Math.round((state.score / MAX_SCORE) * 100);
+    const lvl = levelFor(pct);
+    document.getElementById('levelTag').innerHTML = `<span class="level-tag ${lvl.cls}">${lvl.text} — ${pct}%</span>`;
+
+    const breakdownWrap = document.getElementById('breakdownWrap');
+    breakdownWrap.innerHTML = '';
+    Object.keys(TOPIC_META).forEach(key => {
+      const meta = TOPIC_META[key];
+      const t = state.perTopic[key];
+      const row = document.createElement('div');
+      row.className = 'breakdown-row';
+      row.innerHTML = `<span class="label">${meta.label}</span><span class="frac">${t.correct}/${t.total}</span>`;
+      breakdownWrap.appendChild(row);
+    });
+
+    const reviewList = document.getElementById('reviewList');
+    reviewList.innerHTML = '';
+    state.responses.forEach((r, i) => {
+      const item = document.createElement('div');
+      item.className = 'review-item';
+      let html = `<div class="rq">${i + 1}. [${TOPIC_META[r.topic].label} — ${TYPE_LABEL[r.type]}] ${escapeHtml(r.q)}</div>`;
+      html += `<div class="ra you">Your answer: ${escapeHtml(r.your) || '(blank)'}</div>`;
+      html += `<div class="ra ${r.status}">Points: ${r.points}/${r.maxPoints} ${r.status === 'right' ? '✓' : (r.status === 'partial' ? '~' : '✗')}</div>`;
+      if (r.status !== 'right') html += `<div class="ra model">${r.type === 'long' ? 'Model answer' : 'Correct answer'}: ${escapeHtml(r.correctAnswer)}</div>`;
+      item.innerHTML = html;
+      reviewList.appendChild(item);
+    });
+
+    buildPrintArea(pct, lvl);
+    saveState();
+  }
+
+  function buildPrintArea(pct, lvl) {
+    const printArea = document.getElementById('printArea');
+    let html = `<h2>Surprise Quiz — Unit 1 Check-In</h2>`;
+    html += `<div class="p-sub">CGC1W · Natural Events &amp; Disasters · ${escapeHtml(state.name)} · ${new Date().toLocaleDateString()}</div>`;
+    html += `<div class="p-score">Score: ${state.score}/${MAX_SCORE} (${pct}%) — ${lvl.text}</div>`;
+    html += `<div class="p-breakdown">`;
+    Object.keys(TOPIC_META).forEach(key => {
+      const t = state.perTopic[key];
+      html += `<div><b>${TOPIC_META[key].label}:</b> ${t.correct}/${t.total}</div>`;
+    });
+    html += `</div>`;
+    state.responses.forEach((r, i) => {
+      html += `<div class="p-q">`;
+      html += `<div class="pqh">${i + 1}. [${TOPIC_META[r.topic].label} — ${TYPE_LABEL[r.type]}] ${escapeHtml(r.q)}</div>`;
+      html += `<div class="pqa">Answer: ${escapeHtml(r.your) || '(blank)'}</div>`;
+      const cls = r.status === 'right' ? 'p-right' : (r.status === 'partial' ? 'p-partial' : 'p-wrong');
+      html += `<div class="pqa ${cls}">Points: ${r.points}/${r.maxPoints}</div>`;
+      if (r.status !== 'right') html += `<div class="pqa">${r.type === 'long' ? 'Model answer' : 'Correct answer'}: ${escapeHtml(r.correctAnswer)}</div>`;
+      html += `</div>`;
+    });
+    printArea.innerHTML = html;
+  }
+
+  document.getElementById('pdfBtn').addEventListener('click', () => {
+    window.print();
+  });
+
+  document.getElementById('reviewBtn').addEventListener('click', () => {
+    const list = document.getElementById('reviewList');
+    const btn = document.getElementById('reviewBtn');
+    const nowHidden = list.classList.toggle('hidden');
+    btn.textContent = nowHidden ? 'Review All Answers' : 'Hide Review';
+  });
+
+  document.getElementById('retryBtn').addEventListener('click', () => {
+    finalEl.classList.add('hidden');
+    gateEl.classList.remove('hidden');
+    nameInput.value = '';
+    startBtn.disabled = true;
+    nameInput.focus();
+  });
+
+  // Restore in-progress state if this page was reopened mid-quiz
+  const saved = loadState();
+  if (saved && saved.name) {
+    state = saved;
+    if (state.current >= QUESTIONS.length - 1 && state.answered) {
+      gateEl.classList.add('hidden');
+      showFinal();
+    } else {
+      gateEl.classList.add('hidden');
+      quizEl.classList.remove('hidden');
+      renderQuestion();
+    }
+  }
+
+  try {
+    if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready();
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>
